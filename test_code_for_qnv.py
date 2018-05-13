@@ -1,13 +1,6 @@
 import numpy as np
 import qnv
 
-A=np.array([1,2,3])
-B=np.array([-1,-2,-3])
-C=np.array([1,-2,-3])
-D=np.array([4,-6,7])
-E=np.array([0,-3,2])
-F=np.array([0,0,0])
-
 q1=np.array([1,2,3,4])
 q2=np.array([1,-2,-3,-4])
 q3=np.array([1,-2,-3,4])
