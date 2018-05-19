@@ -15,5 +15,3 @@ def magMoment(sat):
 	v_magf_dot_body=(Bc-Bp)/cons.delay
 	v_magMoment_body= -cons.k * v_magf_dot_body/np.linalg.norm(Bc)
 	return v_magMoment_body
-	print 1
-print 2

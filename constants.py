@@ -30,7 +30,10 @@ Izz = 0.0011
 Ixy = -6.39e-6
 Iyz = -2.16e-5
 Ixz = -5.386e-6
-Imin = min(Ixx, Iyy, Izz, Ixy, Iyz, Ixz)
+I = np.array([[Ixx, Ixy, Ixz],[Ixy, Iyy, Iyz],[Ixz, Iyz, Izz]])
+J=np.linalg.eig(I)
+Jmin=min(J[0][0],J[0][1],J[0][2])
+
 m_INERTIA = np.array([[Ixx, Ixy, Ixz], [Ixy, Iyy, Iyz], [Ixz, Iyz, Izz]])
 m_INERTIA_inv = np.linalg.inv(m_INERTIA)	#inverse of inertia matrix
 
@@ -64,4 +67,4 @@ r_COM = np.array([-0.067e-2,-0.58e-2,-0.067e-2])
 AERO_DRAG = 2.2
 RHO = 0.218e-12
 
-k = 4*np.pi*(1+sin(radians(Inclination)))*Imin/TimePeriod  #gain constant in B_dot controller
+k = 4*np.pi*(1+sin(radians(Inclination-11)))*Jmin/TimePeriod #gain constant in B_dot controller
