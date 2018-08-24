@@ -67,7 +67,7 @@ v_A_Torquer = np.array([0.0049,0.0049,0.0049])	#area vector perpendicular to x-a
 SOLAR_PRESSURE = 4.56e-6	#in N/m^2
 REFLECTIVITY = 0.2
 r_COG_2_COM_b = np.array([1.23e-3,-1.23e-3,-2.44e-3])
-AERO_DRAG = 2.2
-RHO = 0.218e-12
-
+AERO_DRAG = 2.2 # satellite orbits by oliver state that it is a good approximation 
+RHO = 2.36e-14 # mean density at 700 km from http://www.braeunig.us/space/atmos.htm (it follow U.S. Standard Atmosphere, 1976 in SI Units)
+ 
 k_detumbling = 4*np.pi*(1+sin(radians(Inclination-11)))*Jmin/TimePeriod    #gain constant in B_dot controller (from book by F. Landis Markley)
