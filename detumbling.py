@@ -9,7 +9,6 @@ import os
 import qnv
 import math
 import detumbling_con as detcon
-#import actuator
 
 #Read position, velocity, sun-vector, magnetic field (in nanoTeslas) in ECIF from data file
 
