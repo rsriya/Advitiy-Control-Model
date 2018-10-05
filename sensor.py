@@ -54,12 +54,13 @@ def light(ss):
 
 
 def calc_SV(ss):
+    #input : voltage array of all sunsensors
     #calculates back the sun vector using the sensor readings
 
     dark = 0 #number of sunsensors that are in dark
-    light = 1 #light boolean for entire satellite
+    sat_light = 1 #light boolean for entire satellite
 
-    v_light = light(ss)
+    v_light = light(ss) #vector which stores whether each sunsensor is in light
 
     v_sun_m=np.array([0,0,0])     
 
@@ -68,10 +69,10 @@ def calc_SV(ss):
            dark=dark+1
 
     if dark==6:
-      light=0
+      sat_light=0
       return np.array([0,0,0]) #if all sunsensors are dark means satellite is in dark
 
-    if light==1:     
+    if sat_light==1:     
         for n in range(3): #refer readme
               m=n*2;
               if ss[m]>=ss[m+1]:
