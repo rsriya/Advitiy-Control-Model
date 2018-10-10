@@ -65,14 +65,20 @@ SS_QUANTIZER = 3
 SS_THRESHOLD = 0.5
 
 ADC_BIAS = np.array([0,0,0])
+ADC_COV = 0.01*np.identity(3)
 
 #GPS (random values)
 GPS_POS_BIAS = np.array([0,0,0])
 GPS_VEL_BIAS = np.array([0,0,0])
 GPS_TIME_BIAS = 0
+GPS_POS_COV = np.identity(3)
+GPS_VEL_COV = np.identity(3)
+GPS_TIME_COV = 0
+
 
 #Magnetometer (random values)
 MAG_BIAS = np.array([0,0,0])
+MAG_COV = 1e-9*np.identity(3)
 
 
 #------------Initial conditions

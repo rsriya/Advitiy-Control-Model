@@ -10,16 +10,16 @@ def sunsensor(sat):
 	
 	return v_sv_b
 
-def magmeter(sat):
+def magnetometer(sat):
 	v_B_o = sat.getMag_o()
 	v_q_BO = sat.getQ_BO()
 	v_B_b = qnv.quatRotate(v_q_BO,v_B_o)
-	return v_mag_b
+	return v_B_b
 
 def gps(sat):
-	v_pos = sat.getPos() 
-    v_vel = sat.getVel()
-    time = sat.getTime()
+	v_pos_m = sat.getPos() 
+    v_vel_m = sat.getVel()
+    time_m = sat.getTime()
 
 	return np.hstack([v_pos_m,v_vel_m,time_m])
 
