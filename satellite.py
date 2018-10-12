@@ -1,84 +1,120 @@
-from constants import *
+from constants_1U import *
 import numpy as np
-import qnv
 import frames as fs
 
 class Satellite:
 
-	def __init__(self,state0,time0):
+	def __init__(self,v_state0,time0):
 
-		self.time = time0
-		self.setState(state0)		
-		print "init"
-	def setState(self,state):
+		self.setTime(time0)
+		self.setState(v_state0)		
 
-		self.state = state.copy()
-		v_pos_sat_i = state[0:3].copy()
-		v_v_sat_i = state[3:6].copy()
-		q = state[6:10],copy()
-		self.qi = qnv.quatInv(q)
-		self.v_pos_sat_b = qnv.quatRotate(qi, v_pos_sat_i)
-		v_L_i = qnv.quatRotate(q,v_L_b)
-		self.v_dL_cap_i = v_L_i/np.linalg.norm(v_L_i)
-		self.v_dL_cap_e = fs.ecif2ecef(v_dL_cap_i,self.time)
-		self.v_v_sat_e = fs.ecif2ecef(v_v_sat_i,self.time)
+	def setState(self,v_state1):	#set state
 
-	def getState(self):
+		self.v_state = v_state1.copy()
 
-		return self.state
+	def getState(self):	#returns the state
 
-	def setPos(self,pos):
+		return self.v_state
 
-		self.state[0:3] = pos
+	def setPos(self,v_pos):	#set position in eci (earth centered inertial frame)
 
-	def getPos(self):
+		self.v_pos_i = v_pos.copy()
 
-		return self.state[0:3]
+	def getPos(self):	#return position in eci
 
-	def setVel(self,v):
+		return self.v_pos_i
 
-		self.state[3:6] = v
+	def setVel(self,v_vel):	#set velocity in eci
 
-	def getVel(self):
+		self.v_vel_i = v_vel.copy()
 
-		return self.state[3:6]
+	def getVel(self):	#get velocity in eci
 
-	def setQ(self,q):
+		return self.v_vel_i
 
-		self.state[6:10] = q
+	def setQ(self,v_q):	#set exact quaternion
 
-	def getQ(self):
+		self.v_state[0:4] = v_q.copy()
 
-		return self.state[6:10]
+	def getQ(self):	#get exact quaternion
+		return self.v_state[0:4]
 
-	def getQi(self):
+	def setW(self,v_omega):	#set omega
 
-		return self.qi
+		self.v_state[4:7] = v_omega.copy()
 
-	def setW(self,omega):
+	def setTime(self,y):	#set time
+		self.time = y
 
-		self.state[10:13] = omega
+	def getTime(self):	#return time
+		return self.time
+
+	def setDisturbance_b(self,v_torque_dist_b):	#set disturbance in body frame
+		self.v_dist_b = v_torque_dist_b.copy()
+
+	def getDisturbance_b(self):	#return disturbance in body frame
+
+		return self.v_dist_b
+
+
+
+	def setControl_b(self,v_control):	#set control torque in body
+		self.v_control_b = v_control.copy()
+
+	def getControl_b(self): #return control torque in body
+		return self.v_control_b
+
+	def setSun_i(self,v_sv_i):	#set sun vector in eci
+		self.v_sun_i = v_sv_i.copy()	
+
+	def setMag_i(self,v_mag_i):	#set mag in eci
+		self.v_mag_i = v_mag_i.copy()
+
+	def getSun_i(self):	#return sun in eci
+		return self.v_sun_i
+
+	def getMag_i(self):	#return mag in eci
+		return self.v_mag_i
+
+	def getSun_o(self):	#get sun vector in orbit
+		v_sun_o = fs.ecif2orbit(self.v_pos_i,self.v_vel_i,self.v_sun_i)
+		return	v_sun_o
+
+	def getMag_o(self):	#return mag in orbit
+		v_mag_o = fs.ecif2orbit(self.v_pos_i,self.v_vel_i,self.v_mag_i)
+		return	v_mag_o
+
+	def setSun_b_m(self,v_sv_b_m):	#set sunsensor measurement in body
+		self.v_sun_b_m = v_sv_b_m.copy()
+
+	def setMag_b_m(self,v_mag_b_m):	#set mag measurement in body
+		self.v_mag_b_m = v_mag_b_m.copy()
+
+	def getSun_b_m(self):	#return sunsensor measurement in body
+		return self.v_sun_b_m
+
+	def getMag_b_m(self):	#return mag measurement in body
+		return self.v_mag_b_m
+
+	def setQUEST(self,v_q_BO_m):	#set quest quaternion
+		self.quatEstimate = v_q_BO_m.copy()
+
+	def getQUEST(self):	#return quest quaternon
+		return self.quatEstimate
+
+	def setOmega_m(self,omega_m):
+		self.v_w_BO_b_m = omega_m.copy()
+
+	def getOmega_m(self):
+		return self.v_w_BO_b_m
+
+	def setLight(self,flag):
+		self.light = flag
+
+	def getLight(self):
+		return self.light
 
 	def getW(self):
 
-		return self.state[10:13]
-
-	def getEnergy(self):
-		pos = self.getPos()
-		v = self.getVel()
-		omega = self.getW()
-		T = 0.5*Ms*(np.linalg.norm(v))**2 - G*M*(Ms + mu_m*L/(np.linalg.norm(pos)) + 0.5*np.dot(omega, np.matmul(m_Inertia,omega))
-
-	def setEmf(self,e):
-
-		self.emf = e
-
-	def getEmf(self):
-		
-		return self.emf
-
-	def setTime(self,y):
-		self.time = t
-
-	def getTime(self):
-		return self.time
+		return self.v_state[4:7]
