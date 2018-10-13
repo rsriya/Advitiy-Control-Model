@@ -1,7 +1,7 @@
 from constants_1U import *
 import frames as fs
 import numpy as np
-from numpy import multivariate_normal as mvg
+from numpy.random import multivariate_normal as mvg
 import qnv
 
 def ADC(sun_vector):
