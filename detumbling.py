@@ -77,10 +77,12 @@ Advitiy.setDisturbance_b(np.array([0.,0.,0.]))
 
 #-------------Main for loop---------------------
 for  i in range(0,N-1):
-    
-    if math.fmod(i,int(N/100)) == 0:
-        print (int(100*i/N)) 
-    if i==600  : break
+    print(i)
+# =============================================================================
+#     if math.fmod(i,int(N/100)) == 0:
+#         print (int(100*i/N)) 
+#     if i==600  : break
+# =============================================================================
     #Set satellite parameters
     Advitiy.setLight(m_light_output[i,1])
     Advitiy.setState(v_state[i,:])
@@ -120,9 +122,9 @@ for  i in range(0,N-1):
 
     if i%20==0:
         voltage=ctrlTorqueToVoltage(Advitiy)
-#        v_duty_cycle=voltage/PWM_AMPLITUDE
-        v_duty_cycle=np.array([0.5,0.5,0.5])
-        m_current_list = act.getCurrentList(h,v_duty_cycle)  #for getting  PWM current list for a CONTROL_STEP
+        v_duty_cycle=voltage/PWM_AMPLITUDE
+#        v_duty_cycle=np.array([0.5,0.5,0.5])
+#        m_current_list = act.getCurrentList(h,v_duty_cycle)  #for getting  PWM current list for a CONTROL_STEP
         m_current_list=I(voltage)    # for getting DC current list for a CONTROL_STEP
         v_app_torque_b=currentToTorque(m_current_list,Advitiy)
         for k in range(0,v_app_torque_b.shape[0]):
