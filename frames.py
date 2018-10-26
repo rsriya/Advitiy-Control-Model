@@ -71,8 +71,6 @@ def ecef2ecif(v_x_e,t):
 	
 	return v_x_i
 
-
-
 def ecif2orbit(v_pos_i,v_vel_i,v_x_i):
 	#Input: v_pos_i is position in eci frame , v_vel_i is velocity in eci frame, v_x_i is vector to be transformed
 	#output: vector components in orbit frame
@@ -80,9 +78,8 @@ def ecif2orbit(v_pos_i,v_vel_i,v_x_i):
 	y = np.cross(v_vel_i,v_pos_i)/np.linalg.norm(np.cross(v_vel_i,v_pos_i))
 	x = np.cross(y,z)/np.linalg.norm(np.cross(y,z))
 	m_DCM_OI = np.array([x,y,z])
-	
 	v_x_o = np.dot(m_DCM_OI,v_x_i)
-	
+
 	return v_x_o
 
 def qBI2qBO(v_q_BI,v_pos_i,v_vel_i):
@@ -94,17 +91,9 @@ def qBI2qBO(v_q_BI,v_pos_i,v_vel_i):
 	y = np.cross(v_vel_i,v_pos_i)/np.linalg.norm(np.cross(v_vel_i,v_pos_i))
 	x = np.cross(y,z)/np.linalg.norm(np.cross(y,z))
 	m_DCM_OI = np.array([x,y,z])
-
 	v_q_IO = qnv.rotm2quat(np.transpose(m_DCM_OI))
-
-	m_G1 = np.array([[ v_q_BI[0],	-v_q_BI[1], -v_q_BI[2], -v_q_BI[3]],
-				  [	v_q_BI[1],	v_q_BI[0],	v_q_BI[3],	-v_q_BI[2]],
-				  [ v_q_BI[2], -v_q_BI[3], v_q_BI[0], v_q_BI[1]],
-				  [ v_q_BI[3], v_q_BI[2], -v_q_BI[1], v_q_BI[0]]])
-
-	v_q_BO = np.dot(m_G1,v_q_IO)
-
-	if v_q_BO[0] < 0.:
+	v_q_BO = qnv.quatMultiplyNorm(v_q_BI,v_q_IO)
+	if v_q_BO[3] < 0.:
 		v_q_BO = -1.*v_q_BO.copy()
 	v_q_BO = v_q_BO/np.linalg.norm(v_q_BO.copy())	
 
@@ -120,16 +109,10 @@ def qBO2qBI(v_q_BO,v_pos_i,v_vel_i):
 	m_DCM_OI = np.array([x,y,z])
 
 	v_q_OI = qnv.rotm2quat(m_DCM_OI)
-	m_G1 = np.array([[ v_q_BO[0],	-v_q_BO[1], -v_q_BO[2], -v_q_BO[3]],
-				  [	v_q_BO[1],	v_q_BO[0],	v_q_BO[3],	-v_q_BO[2]],
-				  [ v_q_BO[2], -v_q_BO[3], v_q_BO[0], v_q_BO[1]],
-				  [ v_q_BO[3], v_q_BO[2], -v_q_BO[1], v_q_BO[0]]])
-	v_q_BI = np.dot(m_G1,v_q_OI)
-
-	if v_q_BI[0] < 0. :
+	v_q_BI = qnv.quatMultiplyNorm(v_q_BO,v_q_OI)
+	if v_q_BI[3] < 0. :
 		v_q_BI = -1.*v_q_BI.copy()
 	v_qBI = v_q_BI/np.linalg.norm(v_q_BI.copy())	
-
 	return v_q_BI
 
 def wBIb2wBOb(v_w_BI_b,v_q_BO,v_w_IO_o):
@@ -142,25 +125,33 @@ def wBIb2wBOb(v_w_BI_b,v_q_BO,v_w_IO_o):
 
 
 
-'''
-
-def ned2ecef(x,lat,lon):
+def ned2ecef(v,lat,lon):
 	#rotate vector from North-East-Down frame to ecef
-	# lat should be -90 to 90
-	# lon should be 0 to 360
-	v = np.array([-x[2], -x[0], x[1]]) #convert to spherical polar r theta phi
-	
+	#Input:
+	#	lat: latittude in degrees ranges from -90 to 90
+	#	lon: longitude in degrees ranges from (-180,180]	 
+	if lat == 90 or lat == -90:
+		raise ValueError('Latittude value +/-90 occured. NED frame is not defined at north and south pole !!')
 	theta = -lat + 90. #in degree, polar angle (co-latitude)
-	phi = lon #in degree, azimuthal angle
+
+	if lon<0:
+		phi = 360. - abs(lon)
+	else:
+		phi = lon #in degree, azimuthal angle
 	theta = radians(theta)
 	phi = radians(phi)
 
-	DCM = np.array([[sin(theta)*cos(phi), cos(theta)*cos(phi), -sin(phi)],\
-		[sin(theta)*sin(phi), cos(theta)*sin(phi), cos(phi)],\
-		[cos(theta), -sin(theta), 0.]]) #for spherical to cartesian
-
-	y = np.dot(DCM,v)
+	m_DCM_n2e = np.array([[ -cos(theta)*cos(phi),	-sin(phi),	-sin(theta)*cos(phi)],
+						[	-cos(theta)*sin(phi),	cos(phi),	-sin(theta)*sin(phi)],
+						[	sin(theta),	0.0,	-cos(theta)]])
+	
+	y = np.dot(m_DCM_n2e,v)
 
 	return y
 
-'''
+def wBOb2wBIb(v_w_BO_b,v_q_BO,v_w_IO_o):
+	#input: angular velocity of body wrt orbit in body frame, unit quaternion which rotates orbit vector to body frame
+	#		angular velocity of ecif wrt orbit frame in orbit frame
+	#output: angular velocity of body frame wrt eci frame in body frame
+	
+	return v_w_BO_b - qnv.quatRotate(v_q_BO,v_w_IO_o)

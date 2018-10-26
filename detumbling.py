@@ -2,13 +2,16 @@ import numpy as np
 import satellite
 import disturbance_1U as dist
 from constants_1U import v_q0_BO, MODEL_STEP, LINE1, LINE2, G, m_INERTIA, M_EARTH, No_Turns, v_A_Torquer, PWM_AMPLITUDE, PWM_FREQUENCY, RESISTANCE
-from dynamics import x_dot
+from dynamics import x_dot_BI
 import frames as fs
 import solver as sol
 import os
 import qnv
 import math
 import detumbling_con as detcon
+#import actuator
+from TorqueApplied import ctrlTorqueToVoltage,currentToTorque,I
+import actuator as act
 
 #Read position, velocity, sun-vector, magnetic field (in nanoTeslas) in ECIF from data file
 
@@ -38,7 +41,7 @@ print (end)
 
 t0 = m_sgp_output_temp_i[init,0]
 tf = m_sgp_output_temp_i[end,0]	#simulation time in seconds
-h = 0.1		#step size of integration in seconds
+#h = 0.1		#step size of integration in seconds  #declared in constants_1U.py
 N = int((tf-t0)/MODEL_STEP)+1
 
 #extract init to end data from temp file
@@ -110,6 +113,18 @@ for  i in range(0,N-1):
 
 	v_state_next = np.zeros((1,7))
 
+    if i%20==0:
+        voltage=ctrlTorqueToVoltage(Advitiy)
+        v_duty_cycle=voltage/PWM_AMPLITUDE
+        m_current_list = act.getCurrentList(h,v_duty_cycle)  #for getting  PWM current list for a CONTROL_STEP
+# =============================================================================
+#         m_current_list=I(voltage)    # for getting DC current list for a CONTROL_STEP
+# =============================================================================
+        v_app_torque_b=currentToTorque(m_current_list,Advitiy)
+        for k in range(0,v_app_torque_b.shape[0]):
+            Advitiy.setAppTorque_b(v_app_torque_b[k].copy())
+            Advitiy.setTime(t0 + i*MODEL_STEP + (k+1)*h)
+            
 	#Use rk4 solver to calculate the state for next step
 	for j in range(0,int(MODEL_STEP/h)):		
 		v_state_next = sol.rk4Quaternion(Advitiy,x_dot,h)
