@@ -30,3 +30,4 @@ for i in range (N):
 	m_si_output[i,1:4] = v_sun_i.copy();
 
 np.savetxt("si_output.csv", m_si_output, delimiter=",") #Saves si_output to csv file
+
