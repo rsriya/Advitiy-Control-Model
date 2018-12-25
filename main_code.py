@@ -30,7 +30,7 @@ if (orbitbool==1):
 	m_sgp_output_temp_i = np.genfromtxt('sgp_output_SSO.csv', delimiter=",")
 	m_si_output_temp_b = np.genfromtxt('si_output_SSO.csv',delimiter=",")
 	m_light_output_temp = np.genfromtxt('light_output_SSO.csv',delimiter=",")
-	m_magnetic_field_temp_i = np.genfromtxt('mag_output_i_SSO.csv',delimiter=",") 
+	m_magnetic_field_temp_i = np.genfromtxt('mag_output_i_PO.csv',delimiter=",") 
 
 count = 0 # to count no. of transitions from light to eclipses
 init,end = 0,0
@@ -88,12 +88,12 @@ Advitiy.setControl_b(np.array([0.,0.,0.]))
 Advitiy.setMag_b_m_c(m_magnetic_field_i[0,:]) 
 
 #-------------Main for loop---------------------
-for  i in range(0,1):  #loop for control-cycle
+for  i in range(0,N-1):  #loop for control-cycle
 	
 	if math.fmod(i,int(Ncontrol/100)) == 0: #we are printing percentage of cycle completed to keep track of simulation
 		print (int(100*i/Ncontrol))
-	#int(CONTROL_STEP/MODEL_STEP)+1
-	for k in range (0,10):  #loop for environment-cycle
+	
+	for k in range (0,int(CONTROL_STEP/MODEL_STEP)+1):  #loop for environment-cycle
 		#Set satellite parameters
 		#state is set inside solver
 		Advitiy.setPos(m_sgp_output_i[i*int(CONTROL_STEP/MODEL_STEP)+k,1:4])
@@ -173,7 +173,7 @@ for  i in range(0,1):  #loop for control-cycle
 	
 	#if (actcons == 1):
 		#getting applied torque by actuator modelling (magnetic torque limitation is being considered)
-'''
+
 #save the data files
 os.chdir('Logs-Uncontrolled/')
 os.mkdir('trial')
@@ -187,4 +187,3 @@ np.savetxt('disturbance-total.csv',torque_dist_total, delimiter=",")
 np.savetxt('disturbance-gg.csv',torque_dist_gg, delimiter=",")
 np.savetxt('disturbance-solar.csv',torque_dist_solar, delimiter=",")
 np.savetxt('disturbance-aero.csv',torque_dist_aero, delimiter=",")
-'''

@@ -42,6 +42,6 @@ def rk4Quaternion(sat,f,h): #This is Runge Kutta-4 solver for ordinary different
 	if v_state_error_new[3] < 0. :
 		v_state_error_new[0:4] = -v_state_error_new[0:4].copy()
 	sat.setState(v_state_error_new.copy())
-	print("statek+1" ,v_state_error_new)
-	print('\n')
+	#print("statek+1" ,v_state_error_new)
+	#print('\n')
 	return 

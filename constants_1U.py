@@ -57,8 +57,8 @@ Ixy = 0.00000437
 Iyz = - 0.00000408
 Ixz = 0.00000118
 
-#m_INERTIA = np.array([[Ixx, Ixy, Ixz], [Ixy, Iyy, Iyz], [Ixz, Iyz, Izz]])	#actual inertia
-m_INERTIA = np.array([[1.0,0.,0.],[0.,1.,0.],[0.,0.,1.]])	#identity inertia
+m_INERTIA = np.array([[Ixx, Ixy, Ixz], [Ixy, Iyy, Iyz], [Ixz, Iyz, Izz]])	#actual inertia
+#m_INERTIA = np.array([[1.0,0.,0.],[0.,1.,0.],[0.,0.,1.]])	#identity inertia
 
 m_INERTIA_inv = np.linalg.inv(m_INERTIA)	#inverse of inertia matrix
 J=np.linalg.eig(m_INERTIA)
