@@ -129,4 +129,3 @@ def gyroscope(sat):
     v_w_BIB_m = v_w_BIB + v_bias_var + mvg(GYRO_F_BIAS,GYRO_F_COV)
 
 return v_w_BIB_m
-
