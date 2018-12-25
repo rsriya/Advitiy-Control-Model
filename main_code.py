@@ -88,12 +88,12 @@ Advitiy.setControl_b(np.array([0.,0.,0.]))
 Advitiy.setMag_b_m_c(m_magnetic_field_i[0,:]) 
 
 #-------------Main for loop---------------------
-for  i in range(0,1):  #loop for control-cycle
+for  i in range(0,N-1):  #loop for control-cycle
 	
 	if math.fmod(i,int(Ncontrol/100)) == 0: #we are printing percentage of cycle completed to keep track of simulation
 		print (int(100*i/Ncontrol))
-	#int(CONTROL_STEP/MODEL_STEP)+1
-	for k in range (0,1):  #loop for environment-cycle
+	
+	for k in range (0,int(CONTROL_STEP/MODEL_STEP)+1):  #loop for environment-cycle
 		#Set satellite parameters
 		#state is set inside solver
 		Advitiy.setPos(m_sgp_output_i[i*int(CONTROL_STEP/MODEL_STEP)+k,1:4])
