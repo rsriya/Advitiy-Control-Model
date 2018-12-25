@@ -116,9 +116,7 @@ def quat2euler(v_q):
 	#input quaternion
 	#output euler angles: roll, pitch, yaw in degrees
 	m_M = quat2rotm(v_q)
-
 	yaw = math.atan2(m_M[0,1],m_M[0,0])
 	pitch = -math.asin(m_M[0,2])
 	roll = math.atan2(m_M[1,2],m_M[2,2])
-
 	return (180./np.pi)*np.array([roll,pitch,yaw])

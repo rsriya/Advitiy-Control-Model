@@ -19,6 +19,7 @@ def ctrlTorqueToVoltage(sat):
     v_magnetic_moment_b=(1/(np.linalg.norm(v_magnetic_field_b))**2)*np.cross(v_magnetic_field_b,v_torque_control_b)
 
     v_current=(1.0/No_Turns)*np.divide(v_magnetic_moment_b,v_A_Torquer)
+
     voltage=v_current*RESISTANCE  #simple I*R is used, since there's no other way as of now
     return voltage
 
@@ -29,6 +30,7 @@ def I(voltage):
         Output: multi-dimensional array of current for a whole CONTROL_STEP sampled at time interval h,
         when a voltage is directly applied to the circuit.
         First column contains time followed by currents in each torquer. i.e. [time, I1,I2,I3]
+
     '''
     N=int(CONTROL_STEP/h) #current is sampled at these many points
     t = np.linspace(0,CONTROL_STEP,N, endpoint=False)
@@ -48,6 +50,7 @@ def currentToTorque(current_list,sat):
 
     v_magnetic_field_i=sat.getMag_i()
     v_magnetic_field_b=quatRotate(sat.getQ(),v_magnetic_field_i) #get mag field in body frame
+
     v_torque_app_b = np.cross(v_mu_app,v_magnetic_field_b)
     return v_torque_app_b
     

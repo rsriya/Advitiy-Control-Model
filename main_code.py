@@ -32,6 +32,7 @@ if (orbitbool==1):
 	m_light_output_temp = np.genfromtxt('light_output_SSO.csv',delimiter=",")
 	m_magnetic_field_temp_i = np.genfromtxt('mag_output_i_SSO.csv',delimiter=",") 
 
+
 count = 0 # to count no. of transitions from light to eclipses
 init,end = 0,0
 
@@ -55,14 +56,15 @@ t0 = m_sgp_output_temp_i[init,0]
 tf = m_sgp_output_temp_i[end,0]	   #tf-t0 represents simulation time in seconds
 h = 0.1		                       #step size of integration in seconds  
 Nmodel = int((tf-t0)/MODEL_STEP)+1 #no. of time environment-cycle will run
-Ncontrol = int((tf-t0)/CONTROL_STEP)+1 #no. of time control-cycle will run
+Ncontrol = int((tf-t0)/CONTROL_STEP) #no. of time control-cycle will run
 
 #extract init to end data from temp file
 m_sgp_output_i = m_sgp_output_temp_i[init:(init+Nmodel),:].copy()
 m_si_output_b = m_si_output_temp_b[init:(init+Nmodel),:].copy()
 m_light_output = m_light_output_temp[init:(init+Nmodel),:].copy()
 m_magnetic_field_i = m_magnetic_field_temp_i[(init-1):(init+Nmodel),:].copy()
-print (Nmodel ,'Simulation for ' ,MODEL_STEP*(Nmodel-1),'seconds')
+
+print ((Ncontrol)*20 ,'Simulations for', Ncontrol*CONTROL_STEP, 'seconds')
 
 #initialize empty matrices which will be needed in this simulation
 v_state = np.zeros((Nmodel,7))
@@ -91,21 +93,20 @@ print(Ncontrol)
 print(Nmodel)
 #-------------Main for loop---------------------
 for  i in range(0,Ncontrol):  #loop for control-cycle
-	
 	if math.fmod(i,int(Ncontrol/100)) == 0: #we are printing percentage of cycle completed to keep track of simulation
-		print (int(100*i/Ncontrol)) 
-
-	for k in range (0,int(Nmodel/Ncontrol)):  #loop for environment-cycle
+		print (int(100*i/Ncontrol))
+	
+	for k in range (0,int(CONTROL_STEP/MODEL_STEP)+1):  #loop for environment-cycle
 		#Set satellite parameters
 		#state is set inside solver
-		Advitiy.setPos(m_sgp_output_i[i,1:4])
-		Advitiy.setVel(m_sgp_output_i[i,4:7])
-		Advitiy.setLight(m_light_output[i,1])
+		Advitiy.setPos(m_sgp_output_i[i*int(CONTROL_STEP/MODEL_STEP)+k,1:4])
+		Advitiy.setVel(m_sgp_output_i[i*int(CONTROL_STEP/MODEL_STEP)+k,4:7])
+		Advitiy.setLight(m_light_output[i*int(CONTROL_STEP/MODEL_STEP)+k,1])
 		Advitiy.setTime(t0 + i*CONTROL_STEP + k*MODEL_STEP) #time at a cycle 
 
 		#control
-		Advitiy.setSun_i(m_si_output_b[i,1:4])
-		Advitiy.setMag_i(m_magnetic_field_i[i+1,1:4])
+		Advitiy.setSun_i(m_si_output_b[i*int(CONTROL_STEP/MODEL_STEP)+k,1:4])
+		Advitiy.setMag_i(m_magnetic_field_i[i*int(CONTROL_STEP/MODEL_STEP)+k,1:4])
 		#Quest
 		#magMoment_required
 		#AppTorque_b
@@ -114,26 +115,26 @@ for  i in range(0,Ncontrol):  #loop for control-cycle
 		# disturbance torque
 		if (distbool == 0):
 			#getting default disturbance torque (zero in our case)
-			Advitiy.setDisturbance_i(defblock.disturbance(Advitiy))
+
+			Advitiy.setDisturbance_b(defblock.disturbance(Advitiy))
 
 		if (distbool == 1):
 			#getting disturbance torque by disturbance model
 			dist.ggTorqueb(Advitiy)
 			dist.aeroTorqueb(Advitiy)
 			dist.solarTorqueb(Advitiy)
-			
-			torque_dist_gg[i*int(Ncontrol/Nmodel)+k,:] = Advitiy.getggDisturbance_b()
-			torque_dist_aero[i*int(Ncontrol/Nmodel)+k,:] = Advitiy.getaeroDisturbance_b()
-			torque_dist_solar[i*int(Ncontrol/Nmodel)+k,:] = Advitiy.getsolarDisturbance_b()
-			torque_dist_total[i*int(Ncontrol/Nmodel)+k,:] = torque_dist_gg[i*int(Ncontrol/Nmodel)+k,:] + torque_dist_aero[i*int(Ncontrol/Nmodel)+k,:] + torque_dist_solar[i*int(Ncontrol/Nmodel)+k,:]
-			Advitiy.setDisturbance_b(torque_dist_total[i*int(Ncontrol/Nmodel)+k,:].copy())
+
+			torque_dist_gg[i*int(CONTROL_STEP/MODEL_STEP)+k,:] = Advitiy.getggDisturbance_b()
+			torque_dist_aero[i*int(CONTROL_STEP/MODEL_STEP)+k,:] = Advitiy.getaeroDisturbance_b()
+			torque_dist_solar[i*int(CONTROL_STEP/MODEL_STEP)+k,:] = Advitiy.getsolarDisturbance_b()
+			torque_dist_total[i*int(CONTROL_STEP/MODEL_STEP)+k,:] = torque_dist_gg[i*int(CONTROL_STEP/MODEL_STEP)+k,:] + torque_dist_aero[i*int(CONTROL_STEP/MODEL_STEP)+k,:] + torque_dist_solar[i*int(CONTROL_STEP/MODEL_STEP)+k,:]
+			Advitiy.setDisturbance_b(torque_dist_total[i*int(CONTROL_STEP/MODEL_STEP)+k,:].copy())
 			
 		#Use rk4 solver to calculate the state for next step
 		sol.rk4Quaternion(Advitiy,x_dot_BO,h)
-		
 		#storing data in matrices
-		v_state[i*int(Ncontrol/Nmodel)+k+1,:] = Advitiy.getState()
-		euler[i*int(Ncontrol/Nmodel)+k+1,:] = qnv.quat2euler(Advitiy.getQ_BO())
+		v_state[i*int(CONTROL_STEP/MODEL_STEP)+k+1,:] = Advitiy.getState()
+		euler[i*int(CONTROL_STEP/MODEL_STEP)+k+1,:] = qnv.quat2euler(Advitiy.getQ_BO())
 
 	#sensor reading
 	if (sensbool == 0):
