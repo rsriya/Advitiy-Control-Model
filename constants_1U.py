@@ -4,18 +4,19 @@ import numpy as np
 import datetime as dt
 from math import sqrt, sin, radians
 
+AU = 149597870700.0 #Distance between sun and earth in meters
+R_SUN = 6957e5 #Radius of the Sun in meters
 #--------Earth and environment
 W_EARTH = 7.2921150e-5; # rotation velocity of the earth (rad per second)
 G = 6.67408e-11; #universal gravitational constant, SI
 M_EARTH = 5.972e24; #mass of earth, kg
 R_EARTH = 6371.0e3; #radius of earth, m
 ALTITUDE = 700e3 # (in m) assunming height of satellite 700 km
-r = R_EARTH + ALTITUDE #Distance of satellite from center of earth m
-v_w_IO_o = np.array([0., np.sqrt(G*M_EARTH/(r)**3), 0.]) #angular velocity of inertial frame wrt orbit frame in orbit frame
+V_R_B_COE = R_EARTH + ALTITUDE #Distance of satellite from center of earth m
+v_w_IO_o = np.array([0., np.sqrt(G*M_EARTH/(V_R_B_COE)**3), 0.]) #angular velocity of orbit frame wrt inertial frame in orbit frame
 
 AU = 149597870700.0 #Distance between sun and earth in meters
 R_SUN = 6957e5 #Radius of the Sun in meters
-
 #------------date format yyyy,mm,dd (TLE taken from n2yo.com on 3rd April)
 LINE1 = ('1 41783U 16059A   18093.17383152  .00000069  00000-0  22905-4 0  9992') #Insert TLE Here
 LINE2 = ('2 41783  98.1258 155.9141 0032873 333.2318  26.7186 14.62910114 80995') 
@@ -80,7 +81,6 @@ GPS_TIME_COV = 0
 MAG_BIAS = np.array([0,0,0])
 MAG_COV = 1e-9*np.identity(3)
 
-
 #------------Initial conditions
 v_q0_BO = np.array([1.,0.,0.,0.])	#unit quaternion initial condition
 
@@ -103,5 +103,3 @@ AERO_DRAG = 2.2
 RHO = 0.218e-12
 
 k_detumbling = 4*np.pi*(1+sin(radians(Inclination-11)))*Jmin/TimePeriod    #gain constant in B_dot controller (from book by F. Landis Markley)
-
-
