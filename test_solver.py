@@ -10,7 +10,7 @@ def f_constant(sat):
 	return 1.0
 
 class TestSolver(unittest.TestCase):
-	
+
 	def test_constant(self):
 		t0 = 0.0
 		mySat = satellite.Satellite(np.array([1.0,0.,0.,0.,0.,0.,0.]),t0)
@@ -23,12 +23,12 @@ class TestSolver(unittest.TestCase):
 			mySat.setTime(t0+(i+1)*h)
 		self.assertTrue(np.allclose([10.0,10.0,10.0],mySat.getW_BO_b()))
 	
+
 	def test_dynamics(self):
 		t0 = 0.
 		h = 0.001
 		
-		v_q_BO = np.array([0.4,0.254,-0.508,0.71931912])
-		
+		v_q_BO = np.array([0.4,0.254,-0.508,0.71931912])		
 		v_w_BO_b = frames.wBIb2wBOb(np.array([0.1,-0.05,-0.3]),v_q_BO,v_w_IO_o)
 		
 		mySat1 = satellite.Satellite(np.hstack((v_q_BO, v_w_BO_b)),t0)

@@ -1,7 +1,8 @@
 import numpy as np
 
 #------------Initial conditions
-v_q0_BO = np.array([1.,0.,0.,0.])	#unit quaternion initial condition
+
+v_q0_BO = np.array([0.,0.,0.,1.])	#unit quaternion initial condition
 v_w0_BOB = np.array([0.,0.,0.])
 
 MODEL_STEP=0.1

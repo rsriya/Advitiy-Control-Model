@@ -41,7 +41,7 @@ class TestDynamicsBO(unittest.TestCase):
 		mySat.setControl_b(np.array([0.,0.,0.]))
 		result = x_dot_BO(mySat)
 		self.assertTrue(np.allclose(result,[-0.05,0.1957969257,-0.35, 0., 0.00453874, -0.00185081, -0.00168015]))
-	
+
 	def test_kinematics_explicitly(self):
 		qBO = np.array([0.254,-0.508,np.sqrt(1-0.4**2-0.254**2-0.508**2),0.4])
 		vel = np.array([5.60,-5.0,0.0])
@@ -52,6 +52,7 @@ class TestDynamicsBO(unittest.TestCase):
 		mySat.setControl_b(np.array([1e-5,1e-5,-8e-4]))
 		result = x_dot_BO(mySat)
 		self.assertTrue(np.allclose(result,[0.11475622,  0.06438473, -0.04115242, 0.08290271, 0.00632537, 0.00313621, -0.56264705]))
+
 	
 if __name__=='__main__':
 	unittest.main(verbosity=2)

@@ -4,6 +4,8 @@ import numpy as np
 import datetime as dt
 from math import sqrt, sin, radians
 
+AU = 149597870700.0 #Distance between sun and earth in meters
+R_SUN = 6957e5 #Radius of the Sun in meters
 #--------Earth and environment
 W_EARTH = 7.2921150e-5; # rotation velocity of the earth (rad per second)
 G = 6.67408e-11; #universal gravitational constant, SI
@@ -15,7 +17,6 @@ v_w_IO_o = np.array([0., np.sqrt(G*M_EARTH/(V_R_B_COE)**3), 0.]) #angular veloci
 
 AU = 149597870700.0 #Distance between sun and earth in meters
 R_SUN = 6957e5 #Radius of the Sun in meters
-
 #------------date format yyyy,mm,dd (TLE taken from n2yo.com on 3rd April)
 LINE1 = ('1 41783U 16059A   18093.17383152  .00000069  00000-0  22905-4 0  9992') #Insert TLE Here
 LINE2 = ('2 41783  98.1258 155.9141 0032873 333.2318  26.7186 14.62910114 80995') 
@@ -52,6 +53,41 @@ v_Ax = np.array([0.01,0.,0.])	#area vector perpendicular to x-axis in m^2
 v_Ay = np.array([0.,0.01,0.])	#area vector perpendicular to y-axis in m^2
 v_Az = np.array([0.,0.,0.01])	#area vector perpendicular to z-axis in m^2
 
+#Sunsensor (random values)
+v_S1 = np.array([1,0,0])
+v_S2 = np.array([-1,0,0])
+v_S3 = np.array([0,1,0])
+v_S4 = np.array([0,-1,0])
+v_S5 = np.array([0,0,1])
+v_S6 = np.array([0,0,-1])
+
+SS_GAIN = 1
+SS_QUANTIZER = 3
+SS_THRESHOLD = 0.5
+
+ADC_BIAS = np.array([0,0,0])
+ADC_COV = 0.01*np.identity(3)
+
+#GPS (random values)
+GPS_POS_BIAS = np.array([0,0,0])
+GPS_VEL_BIAS = np.array([0,0,0])
+GPS_TIME_BIAS = 0
+GPS_POS_COV = np.identity(3)
+GPS_VEL_COV = np.identity(3)
+GPS_TIME_COV = 0
+
+
+#Magnetometer (random values)
+MAG_BIAS = np.array([0,0,0])
+MAG_COV = 1e-9*np.identity(3)
+
+#------------Initial conditions
+v_q0_BO = np.array([1.,0.,0.,0.])	#unit quaternion initial condition
+
+MODEL_STEP=0.1
+CONTROL_STEP = 2.0	#control cycle time period in second
+h = 0.001 #step size of integration in seconds
+
 INDUCTANCE = 68e-3	#Inductance of torquer in Henry
 RESISTANCE = 107.0	#Resistance of torquer	in Ohm
 PWM_AMPLITUDE = 3.3	#PWM amplitude in volt
@@ -65,26 +101,5 @@ REFLECTIVITY = 0.2
 r_COG_2_COM_b = np.array([-0.69105608e-3,-0.69173140e-3,-2.37203930e-3])
 AERO_DRAG = 2.2
 RHO = 0.218e-12
-
-#Sunsensor (random values)
-v_S1 = np.array([1,0,0])
-v_S2 = np.array([-1,0,0])
-v_S3 = np.array([0,1,0])
-v_S4 = np.array([0,-1,0])
-v_S5 = np.array([0,0,1])
-v_S6 = np.array([0,0,-1])
-
-SS_GAIN = 1
-SS_QUANTIZER = 3
-SS_THRESHOLD = 0.5
-
-ADC_BIAS = np.array([0,0,0,0,0,0])
-#GPS (random values)
-GPS_POS_BIAS = np.array([0,0,0])
-GPS_VEL_BIAS = np.array([0,0,0])
-GPS_TIME_BIAS = 0
-
-#Magnetometer (random values)
-MAG_BIAS = np.array([0,0,0])
 
 k_detumbling = 4*np.pi*(1+sin(radians(Inclination-11)))*Jmin/TimePeriod    #gain constant in B_dot controller (from book by F. Landis Markley)

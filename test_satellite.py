@@ -129,6 +129,14 @@ else:
 	print ("setVel or getVel incorrect")
 
 
+Sat4.setQ_BI(q)
+Q=Sat4.getQ_BI()
+
+if (Q==q).all():
+	print ("setQ_BI and getQ_BI correct")
+else:
+	print ("setQ_BI and getQ_BI incorrect")
+
 Sat4.setQ_BO(q1)
 Q=Sat4.getQ_BO()
 
@@ -137,7 +145,6 @@ if (Q==q1).all():
 else:
 	print ("setQ_BO and getQ_BO incorrect")
 
-		
 Sat4.setW_BO_b(w)
 a=Sat4.getW_BO_b()
 b = Sat4.getW_BI_b()
@@ -341,6 +348,7 @@ else:
 v_gyro_bias = np.array([-0.00001,0.0,0.3253])
 Sat4.setGyroVarBias(v_gyro_bias)
 bias=Sat4.getGyroVarBias()
+
 if (bias==v_gyro_bias).all():
 	print ("setGyroVarBias and getGyroVarBias correct")
 else:
@@ -362,3 +370,4 @@ if (bias==v_J2data).all():
 	print ("setJ2Data and getJ2Data correct")
 else:
 	print ("setJ2Data or getJ2Data incorrect")
+
