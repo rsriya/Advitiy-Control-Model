@@ -45,6 +45,7 @@ def currentToTorque(current_list,sat):
         Output: The torque acting on the satellite due to current in torquer at an instant.
     '''
     v_mu_app = No_Turns*np.multiply(v_A_Torquer,current_list[:,1:]) # since current_list is array with [time, I1,I2,I3]
+
     v_magnetic_field_i=sat.getMag_i()
     v_magnetic_field_b=quatRotate(sat.getQ(),v_magnetic_field_i) #get mag field in body frame
     v_torque_app_b = np.cross(v_mu_app,v_magnetic_field_b)

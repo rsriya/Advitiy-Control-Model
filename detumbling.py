@@ -1,8 +1,8 @@
 import numpy as np
 import satellite
 import disturbance_1U as dist
-from constants_1U import v_q0_BO, MODEL_STEP, LINE1, LINE2, G, m_INERTIA, M_EARTH, No_Turns, v_A_Torquer, PWM_AMPLITUDE, PWM_FREQUENCY, RESISTANCE,h
-from dynamics import x_dot_BO
+from constants_1U import v_q0_BO, MODEL_STEP, LINE1, LINE2, G, m_INERTIA, M_EARTH, No_Turns, v_A_Torquer, PWM_AMPLITUDE, PWM_FREQUENCY, RESISTANCE
+from dynamics import x_dot_BI
 import frames as fs
 import solver as sol
 import os
@@ -24,24 +24,24 @@ count = 0 # to count no. of transitions from light to eclipses
 init,end = 0,0
 
 for k in range(0,len(m_light_output_temp)-1):
-    #obtain index corresponding to the start of eclipse
-    l1 = m_light_output_temp[k,1]
-    l2 = m_light_output_temp[k+1,1]
-    if l1 ==0.5 and l2 == 0 and count == 0:    #start of first eclipse
-        init = k
-        count = 1
-        
-    elif l1==0.5 and l2==0 and count == 1:    #start of second eclipse
-        end = k 
-        break
+	#obtain index corresponding to the start of eclipse
+	l1 = m_light_output_temp[k,1]
+	l2 = m_light_output_temp[k+1,1]
+	if l1 ==0.5 and l2 == 0 and count == 0:	#start of first eclipse
+		init = k
+		count = 1
+		
+	elif l1==0.5 and l2==0 and count == 1:	#start of second eclipse
+		end = k 
+		break
 
 #define simulation parameters
 print (init)
 print (end)
 
 t0 = m_sgp_output_temp_i[init,0]
-tf = m_sgp_output_temp_i[end,0]    #simulation time in seconds
-#h = 0.1        #step size of integration in seconds  #declared in constants_1U.py
+tf = m_sgp_output_temp_i[end,0]	#simulation time in seconds
+#h = 0.1		#step size of integration in seconds  #declared in constants_1U.py
 N = int((tf-t0)/MODEL_STEP)+1
 
 #extract init to end data from temp file
@@ -54,26 +54,24 @@ print (N ,'Simulation for ' ,MODEL_STEP*(N-1),'seconds')
 #initialize empty matrices
 v_state = np.zeros((N,7))
 v_q_BO = np.zeros((N,4))
-v_q_BI=np.zeros((N,4))
 v_w_BOB = np.zeros((N,3))
 euler = np.zeros((N,3))
 torque_dist = np.zeros((N,3))
 
 v_current_p = np.zeros(3)
 v_current_req = np.zeros(3)
-v_q0_BI = fs.qBO2qBI(v_q0_BO,m_sgp_output_i[0,1:4],m_sgp_output_i[0,4:7])    
+v_q0_BI = fs.qBO_2_qBI(v_q0_BO,m_sgp_output_i[0,1:4],m_sgp_output_i[0,4:7])	
 r=np.linalg.norm(m_sgp_output_i[0,1:4])
 v_w0_BIB = -np.array([0., np.sqrt(G*M_EARTH/(r)**3), 0.])
 v_state[0,:] = np.hstack((v_q0_BI,v_w0_BIB))
 v_q_BO[0,:] = v_q0_BO
-v_q_BI[0,:] = v_q0_BI
 v_w_BOB[0,:] = fs.wBIb2wBOb(v_w0_BIB,v_q_BO[0,:],(-v_w0_BIB))
 euler[0,:] = qnv.quat2euler(v_q_BO[0,:])
 
 #Make satellite object
 Advitiy = satellite.Satellite(v_state[0,:],t0)
-Advitiy.setControl_b(np.array([0.,0.,0.]))    
-Advitiy.setDisturbance_b(np.array([0.,0.,0.]))
+Advitiy.setControl_b(np.array([0.,0.,0.]))	
+Advitiy.setDisturbance_i(np.array([0.,0.,0.]))
 
 #-------------Main for loop---------------------
 for  i in range(0,N-1):
@@ -120,6 +118,7 @@ for  i in range(0,N-1):
 
     v_state_next = np.zeros((1,7))
 
+
     if i%20==0:
         voltage=ctrlTorqueToVoltage(Advitiy)
         v_duty_cycle=voltage/PWM_AMPLITUDE
@@ -131,20 +130,20 @@ for  i in range(0,N-1):
             Advitiy.setAppTorque_b(v_app_torque_b[k].copy())
             Advitiy.setTime(t0 + i*MODEL_STEP + (k+1)*h)
             
-    #Use rk4 solver to calculate the state for next step
-    for j in range(0,int(MODEL_STEP/h)):        
-        v_state_next = sol.rk4Quaternion(Advitiy,x_dot_BO,h)
-        Advitiy.setState(v_state_next.copy())
-        Advitiy.setTime(t0 + i*MODEL_STEP + (j+1)*h)
+	#Use rk4 solver to calculate the state for next step
+	for j in range(0,int(MODEL_STEP/h)):		
+		v_state_next = sol.rk4Quaternion(Advitiy,x_dot,h)
+		Advitiy.setState(v_state_next.copy())
+		Advitiy.setTime(t0 + i*MODEL_STEP + (j+1)*h)
 
-    v_state[i+1,:] = v_state_next.copy()
-    
-    #Calculate observable quantities
-    v_q_BO[i+1,:] = v_state_next[0:4]
-    r=np.linalg.norm(m_sgp_output_i[i+1,1:4])
-    v_w0_BIB = -np.array([0., np.sqrt(G*M_EARTH/(r)**3), 0.])
-    v_w_BOB[i+1,:] = fs.wBIb2wBOb(v_state_next[4:7],v_q_BO[i+1,:],(-v_w0_BIB))
-    euler[i+1,:] = qnv.quat2euler(v_q_BO[i+1,:])
+	v_state[i+1,:] = v_state_next.copy()
+	
+	#Calculate observable quantities
+	v_q_BO[i+1,:] = fs.qBI2qBO(v_state_next[0:4],m_sgp_output_i[i+1,1:4],m_sgp_output_i[i+1,4:7])
+	r=np.linalg.norm(m_sgp_output_i[i+1,1:4])
+	v_w0_BIB = -np.array([0., np.sqrt(G*M_EARTH/(r)**3), 0.])
+	v_w_BOB[i+1,:] = fs.wBIb2wBOb(v_state_next[4:7],v_q_BO[i+1,:],(-v_w0_BIB))
+	euler[i+1,:] = qnv.quat2euler(v_q_BO[i+1,:])
 
 #save the data files
 os.chdir('Logs-Detumbling/')

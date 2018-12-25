@@ -13,17 +13,14 @@ def ggTorqueb(s):
     gives output:
       torque due to gravity gradient about centre of mass in body frame
     '''
-    v_q_BI = s.getQ()   #unit quaternion
+    v_q_BI = s.getQ_BI()   #unit quaternion
     v_pos_i = s.getPos()
     v_pos_b = qnv.quatRotate(v_q_BI, v_pos_i)
     pos_norm = np.linalg.norm(v_pos_b)
     
     v_t_gg_b = 3. * M_EARTH * G * (np.cross(v_pos_b, np.dot(m_INERTIA, v_pos_b))) / (pos_norm ** 5.)
- 
-    return v_t_gg_b
-
-
-
+    
+    s.setggDisturbance_b(v_t_gg_b)
 
 def aeroTorqueb(s):
     '''
@@ -35,7 +32,7 @@ def aeroTorqueb(s):
         torque due to air drag about COM in body frame
     '''
 
-    v_q_BI = s.getQ()
+    v_q_BI = s.getQ_BI()
     
     v_vel_sat_i = s.getVel()
     v_pos_i = s.getPos()
@@ -46,9 +43,7 @@ def aeroTorqueb(s):
     
     area = Lx * Lx * (abs(v_vel_b[0]) + abs(v_vel_b[1]) + abs(v_vel_b[2]))  # area of satellite perpendicular to velocity
     v_t_ad_b = np.cross(r_COG_2_COM_b, v_vel_b) * RHO * AERO_DRAG  * area / 2.
-
-    return v_t_ad_b
-
+    s.setaeroDisturbance_b(v_t_ad_b)
 
 def solarTorqueb(s):
     '''
@@ -65,7 +60,7 @@ def solarTorqueb(s):
     
     else:   #light region
 
-        v_q_BI = s.getQ()
+        v_q_BI = s.getQ_BI()
     
         v_sv_i = s.getSun_i()  # unit sun vector in inertial frame obtained from satellite object
         v_sv_b_u = qnv.quatRotate(v_q_BI, v_sv_i) / np.linalg.norm(v_sv_i)
@@ -79,5 +74,6 @@ def solarTorqueb(s):
         
         #total solar-pressure torque
         v_t_sd_b = v_t_sd1_b + v_t_sd2_b
+        
+    s.setsolarDisturbance_b(v_t_sd_b)
 
-    return v_t_sd_b

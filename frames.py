@@ -71,8 +71,6 @@ def ecef2ecif(v_x_e,t):
 	
 	return v_x_i
 
-
-
 def ecif2orbit(v_pos_i,v_vel_i,v_x_i):
 	#Input: v_pos_i is position in eci frame , v_vel_i is velocity in eci frame, v_x_i is vector to be transformed
 	#output: vector components in orbit frame
@@ -80,9 +78,8 @@ def ecif2orbit(v_pos_i,v_vel_i,v_x_i):
 	y = np.cross(v_vel_i,v_pos_i)/np.linalg.norm(np.cross(v_vel_i,v_pos_i))
 	x = np.cross(y,z)/np.linalg.norm(np.cross(y,z))
 	m_DCM_OI = np.array([x,y,z])
-	
 	v_x_o = np.dot(m_DCM_OI,v_x_i)
-	
+
 	return v_x_o
 
 def qBI2qBO(v_q_BI,v_pos_i,v_vel_i):
@@ -94,17 +91,9 @@ def qBI2qBO(v_q_BI,v_pos_i,v_vel_i):
 	y = np.cross(v_vel_i,v_pos_i)/np.linalg.norm(np.cross(v_vel_i,v_pos_i))
 	x = np.cross(y,z)/np.linalg.norm(np.cross(y,z))
 	m_DCM_OI = np.array([x,y,z])
-
 	v_q_IO = qnv.rotm2quat(np.transpose(m_DCM_OI))
-
-	m_G1 = np.array([[ v_q_BI[0],	-v_q_BI[1], -v_q_BI[2], -v_q_BI[3]],
-				  [	v_q_BI[1],	v_q_BI[0],	v_q_BI[3],	-v_q_BI[2]],
-				  [ v_q_BI[2], -v_q_BI[3], v_q_BI[0], v_q_BI[1]],
-				  [ v_q_BI[3], v_q_BI[2], -v_q_BI[1], v_q_BI[0]]])
-
-	v_q_BO = np.dot(m_G1,v_q_IO)
-
-	if v_q_BO[0] < 0.:
+	v_q_BO = qnv.quatMultiplyNorm(v_q_BI,v_q_IO)
+	if v_q_BO[3] < 0.:
 		v_q_BO = -1.*v_q_BO.copy()
 	v_q_BO = v_q_BO/np.linalg.norm(v_q_BO.copy())	
 
@@ -120,13 +109,8 @@ def qBO2qBI(v_q_BO,v_pos_i,v_vel_i):
 	m_DCM_OI = np.array([x,y,z])
 
 	v_q_OI = qnv.rotm2quat(m_DCM_OI)
-	m_G1 = np.array([[ v_q_BO[0],	-v_q_BO[1], -v_q_BO[2], -v_q_BO[3]],
-				  [	v_q_BO[1],	v_q_BO[0],	v_q_BO[3],	-v_q_BO[2]],
-				  [ v_q_BO[2], -v_q_BO[3], v_q_BO[0], v_q_BO[1]],
-				  [ v_q_BO[3], v_q_BO[2], -v_q_BO[1], v_q_BO[0]]])
-	v_q_BI = np.dot(m_G1,v_q_OI)
-
-	if v_q_BI[0] < 0. :
+	v_q_BI = qnv.quatMultiplyNorm(v_q_BO,v_q_OI)
+	if v_q_BI[3] < 0. :
 		v_q_BI = -1.*v_q_BI.copy()
 	v_qBI = v_q_BI/np.linalg.norm(v_q_BI.copy())	
 
