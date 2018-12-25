@@ -2,6 +2,7 @@ from constants_1U import *
 import frames as fs
 import numpy as np
 from numpy.random import multivariate_normal as mvg
+
 import qnv
 
 def ADC(sun_vector):
@@ -15,6 +16,7 @@ def ADC(sun_vector):
 
     m_normalVectors = np.zeros([6,3]) #matrix of normal vectors of sensors
     #S1 and S2 are opposite, S3 and S4 are opposite, S5 and S6 are opposite
+
     m_normalVectors[0,:] = v_S1
     m_normalVectors[1,:] = v_S2
     m_normalVectors[2,:] = v_S3
@@ -30,8 +32,8 @@ def ADC(sun_vector):
             v=0  #if v < 0 that means the sunvector is making obtuse angle with the sensor which means the sensor is in dark   
         v=(u)*(round(v/u))*SS_GAIN #conversion from dot product to voltage
         v_output[iter] = v
-
     v_output = v_output + mvg(ADC_BIAS,ADC_COV) #add error to true quantity
+
 
     return v_output
 
@@ -85,6 +87,7 @@ def sunsensor(sat):
     v_s_o = sat.getSun_o() #obtain sunvector in orbit frame
     v_s_b = qnv.quatRotate(v_q_BO,v_s_o) #obtain sunvector in body frame
     ss_read = ADC(v_s_b) #find reading per sunsensor, error already incorporated in ADC code
+
     v_sun_b_m = calc_SV(ss_read) #calculate sunvector from sunsensor readings
 
     return v_sun_b_m
@@ -116,6 +119,7 @@ def magnetometer(sat):
     v_B_o = sat.getMag_o() #obtain magnetic field in orbit frame
     v_B_b = qnv.quatRotate(v_q_BO,v_B_o) #obtain magnetic field in body frame
     v_B_m = v_B_b + mvg(MAG_BIAS,MAG_COV) #add errors
+
     return v_B_m
     
 def gyroscope(sat):
