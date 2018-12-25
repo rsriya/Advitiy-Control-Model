@@ -1,7 +1,4 @@
 import numpy as np
-from datetime import *
-from sgp4.earth_gravity import wgs72
-from sgp4.io import twoline2rv
 #REFER https://en.wikipedia.org/wiki/Two-line_element_set
 line1 = '1 NNNNNC NNNNNAAA NNNNN.NNNNNNNN +.NNNNNNNN +NNNNN-N +NNNNN-N N NNNNN'
 line2 = '2 NNNNN NNN.NNNN NNN.NNNN NNNNNNN NNN.NNNN NNN.NNNN NN.NNNNNNNNNNNNNN'
@@ -55,7 +52,6 @@ print len(line1)
 line2 = list(line2)
 print line2
 print len(line2)
-
 
 #1	01-01	Line number	2
 #2	03-07	Satellite number	25544

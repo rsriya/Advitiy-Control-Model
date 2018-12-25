@@ -128,6 +128,7 @@ if (v_vel_i == state2).all():
 else:
 	print ("setVel or getVel incorrect")
 
+
 Sat4.setQ_BI(q)
 Q=Sat4.getQ_BI()
 
@@ -157,6 +158,18 @@ if (b==w2).all():
 	print ("getW_BI_b correct")
 else:
 	print ("getW_BI_b incorrect")
+
+expected = np.array([-0.5*np.sqrt(1+0.5*np.sqrt(3.)), 
+						-0.25*np.sqrt(2/(2+np.sqrt(3))), 0.25*np.sqrt(2/(2+np.sqrt(3))), 0.5*np.sqrt(1+0.5*np.sqrt(3.))])
+		
+Sat4.setPos(np.array([0.,0.,7.07e6]))
+Sat4.setVel(np.array([0.,7.0e3,0.]))
+Sat4.setQ_BO((0.5/np.sqrt(2.))*np.array([np.sqrt(3.),1.,1.,np.sqrt(3.)]))
+Q=Sat4.getQ_BI()
+if (np.allclose(Q, expected))==1:
+	print ("getQ_BI correct")
+else:
+	print ("getQ_BI incorrect")
 
 Sat4.setDisturbance_b(arr1)
 a=Sat4.getDisturbance_b()
@@ -334,9 +347,27 @@ else:
 
 v_gyro_bias = np.array([-0.00001,0.0,0.3253])
 Sat4.setGyroVarBias(v_gyro_bias)
-bias=getGyroVarBias()
+bias=Sat4.getGyroVarBias()
+
 if (bias==v_gyro_bias).all():
 	print ("setGyroVarBias and getGyroVarBias correct")
 else:
 	print ("setGyroVarBias and getGyroVarBias incorrect")
+
+v_gpsdata = np.array([-0.00001,0.0,0.3253,10e6,-5e6,-9,1.35])
+Sat4.setgpsData(v_gpsdata)
+bias=Sat4.getgpsData()
+if (bias==v_gpsdata).all():
+	print ("setgpsData and getgpsData correct")
+else:
+	print ("setgpsData or getgpsData incorrect")
+
+
+v_J2data = np.array([-0.00001,0.0,0.3253,10e6,-5e6,-9,1.35])
+Sat4.setJ2Data(v_J2data)
+bias=Sat4.getJ2Data()
+if (bias==v_J2data).all():
+	print ("setJ2Data and getJ2Data correct")
+else:
+	print ("setJ2Data or getJ2Data incorrect")
 

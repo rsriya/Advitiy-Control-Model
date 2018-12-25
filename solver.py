@@ -6,14 +6,14 @@ def rk4Quaternion(sat,f,h): #This is Runge Kutta-4 solver for ordinary different
 	'''
 		Input is satellite object, f (derivative of state vector (quaternion and angular velocity)) and integration step size
 		It returns value of state at next time (after a time step of h) (x(t+h)) using f and value of state at current time (x(t))
-	
+
 	print(sat.getQ_BI())
 	print(sat.getW_BI_b())
 	print(sat.getControl_b())
 	print(sat.getDisturbance_b())
 	print(sat.getVel())
 	print(sat.getPos())
-	'''
+	
 	v_state_error_0 = sat.getState()	#state at t = t0	
 	t = sat.getTime() 
 	#rk-4 routine (updating satellite class state with obtained state at every step of rk4 routine)

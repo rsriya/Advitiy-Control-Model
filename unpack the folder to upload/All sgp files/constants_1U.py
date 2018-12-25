@@ -23,16 +23,16 @@ LINE1 = ('1 88888U 16059A   80275.98708465 +.00073094 +13844-3 +66816-4 0  9998'
 LINE2 = ('2 88888  72.8435 115.9689 0086731  52.6988 110.5714 16.05824518   105') 
 
 ### add TT and dT in constants
-TT = 1440#100.0 # total time in minutes   ##add in constant
-dT = np.linspace(0.0,TT*60.0,(TT*60*10 + 1)) #np.linspace(0.0,TT*60.0,(100*60*10 + 1)) ## dT is in seconds. total 100 minutes here. 10 is for 1/timestep
+TT = 100.0 # total time in minutes   ##add in constant
+dT = np.linspace(0.0,TT*60.0,(100*60*10 + 1)) ## dT is in seconds. total 100 minutes here. 10 is for 1/timestep
 ####ADDED following block ......these data based on spacetrack report3 page 81
-MeanMo = 16.05824518#14.62910114  #16.05824518
+MeanMo = 16.05824518#14.62910114  #16.05824518 in revolution per day
 Eccen = 0.0086731#0.0032873     # 0.0086731
-Incl_deg =72.8435 #98.1258  #72.8435
-MeanAnamoly_deg = 110.5714#26.7186  #110.5714
-ArgP = 52.6988#333.2318 #52.6988
-RAAN_deg = 115.9689 #155.9141  # 115.9689
-DMeanMotion =.00073094
+Incl_deg =72.8435 #98.1258  #72.8435 in degrees
+MeanAnamoly_deg = 110.5714#26.7186  #110.5714 in degrees
+ArgP = 52.6988#333.2318 #52.6988 in degrees
+RAAN_deg = 115.9689 #155.9141  # 115.9689 in degrees
+DMeanMotion =.00073094 
 DDMeanMotion =0.13844e-3
 BStar =0.66816e-4#0.22905e-4 #7e-07
 

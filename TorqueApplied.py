@@ -18,8 +18,8 @@ def ctrlTorqueToVoltage(sat):
     #below is formulae for calculating required magnetic moment from the control torque
     v_magnetic_moment_b=(1/(np.linalg.norm(v_magnetic_field_b))**2)*np.cross(v_magnetic_field_b,v_torque_control_b)
 
-    Torquer_area=v_A_Torquer
-    v_current=(1.0/No_Turns)*np.divide(v_magnetic_moment_b,Torquer_area)
+    v_current=(1.0/No_Turns)*np.divide(v_magnetic_moment_b,v_A_Torquer)
+
     voltage=v_current*RESISTANCE  #simple I*R is used, since there's no other way as of now
     return voltage
 
@@ -27,7 +27,10 @@ def I(voltage):
     '''
         This function calculates array of current for an applied DC voltage to LR circuit
         Input: voltage to be applied as calcuated by above function(ctrlTorqueToVoltage)
-        Output: array of current for a CONTROL_STEP when a voltage is directly applied to the circuit.
+        Output: multi-dimensional array of current for a whole CONTROL_STEP sampled at time interval h,
+        when a voltage is directly applied to the circuit.
+        First column contains time followed by currents in each torquer. i.e. [time, I1,I2,I3]
+
     '''
     N=int(CONTROL_STEP/h) #current is sampled at these many points
     t = np.linspace(0,CONTROL_STEP,N, endpoint=False)
@@ -41,11 +44,13 @@ def currentToTorque(current_list,sat):
     '''
         This function calculates the torques acting on satellite to a corresponding current in the torquer.
         Input: array of currents with first row as time and next three as currents, satellite
-        Output: The torque acting on the satellite due to current in torquer.
+        Output: The torque acting on the satellite due to current in torquer at an instant.
     '''
-    v_mu_app = No_Turns*np.multiply(v_A_Torquer,current_list[:,1:])
+    v_mu_app = No_Turns*np.multiply(v_A_Torquer,current_list[:,1:]) # since current_list is array with [time, I1,I2,I3]
+
     v_magnetic_field_i=sat.getMag_i()
-    v_magnetic_field_b=quatRotate(sat.getQ(),v_magnetic_field_i) #get mag field in boyd frame
+    v_magnetic_field_b=quatRotate(sat.getQ(),v_magnetic_field_i) #get mag field in body frame
+
     v_torque_app_b = np.cross(v_mu_app,v_magnetic_field_b)
     return v_torque_app_b
     

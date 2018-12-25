@@ -30,7 +30,8 @@ if (orbitbool==1):
 	m_sgp_output_temp_i = np.genfromtxt('sgp_output_SSO.csv', delimiter=",")
 	m_si_output_temp_b = np.genfromtxt('si_output_SSO.csv',delimiter=",")
 	m_light_output_temp = np.genfromtxt('light_output_SSO.csv',delimiter=",")
-	m_magnetic_field_temp_i = np.genfromtxt('mag_output_i_PO.csv',delimiter=",") 
+	m_magnetic_field_temp_i = np.genfromtxt('mag_output_i_SSO.csv',delimiter=",") 
+
 
 count = 0 # to count no. of transitions from light to eclipses
 init,end = 0,0
@@ -39,11 +40,11 @@ for k in range(0,len(m_light_output_temp)-2): #we go to k=length-2 only because 
 	#obtain index corresponding to the start of eclipse
 	l1 = m_light_output_temp[k,1]
 	l2 = m_light_output_temp[k+1,1]
-	if l1 ==1 and l2 == 0.5 and count == 0:	#start of first eclipse
+	if l1 ==0.5 and l2 == 0 and count == 0:	#start of first eclipse
 		init = k
 		count = 1
 		
-	elif l1==0.5 and l2==1 and count == 1:	#start of second eclipse
+	elif l1==0.5 and l2==0 and count == 1:	#start of second eclipse
 		end = k 
 		break
 
@@ -62,6 +63,7 @@ m_sgp_output_i = m_sgp_output_temp_i[init:(init+Nmodel),:].copy()
 m_si_output_b = m_si_output_temp_b[init:(init+Nmodel),:].copy()
 m_light_output = m_light_output_temp[init:(init+Nmodel),:].copy()
 m_magnetic_field_i = m_magnetic_field_temp_i[(init-1):(init+Nmodel),:].copy()
+
 print ((Ncontrol)*20 ,'Simulations for', Ncontrol*CONTROL_STEP, 'seconds')
 
 #initialize empty matrices which will be needed in this simulation
@@ -87,9 +89,10 @@ Advitiy = satellite.Satellite(v_state[0,:],t0)   #t0 from line 42 of main_code
 Advitiy.setControl_b(np.array([0.,0.,0.]))		
 Advitiy.setMag_b_m_c(m_magnetic_field_i[0,:]) 
 
+print(Ncontrol)
+print(Nmodel)
 #-------------Main for loop---------------------
-for  i in range(0,N-1):  #loop for control-cycle
-	
+for  i in range(0,Ncontrol):  #loop for control-cycle
 	if math.fmod(i,int(Ncontrol/100)) == 0: #we are printing percentage of cycle completed to keep track of simulation
 		print (int(100*i/Ncontrol))
 	
@@ -112,6 +115,7 @@ for  i in range(0,N-1):  #loop for control-cycle
 		# disturbance torque
 		if (distbool == 0):
 			#getting default disturbance torque (zero in our case)
+
 			Advitiy.setDisturbance_b(defblock.disturbance(Advitiy))
 
 		if (distbool == 1):
@@ -119,6 +123,7 @@ for  i in range(0,N-1):  #loop for control-cycle
 			dist.ggTorqueb(Advitiy)
 			dist.aeroTorqueb(Advitiy)
 			dist.solarTorqueb(Advitiy)
+
 			torque_dist_gg[i*int(CONTROL_STEP/MODEL_STEP)+k,:] = Advitiy.getggDisturbance_b()
 			torque_dist_aero[i*int(CONTROL_STEP/MODEL_STEP)+k,:] = Advitiy.getaeroDisturbance_b()
 			torque_dist_solar[i*int(CONTROL_STEP/MODEL_STEP)+k,:] = Advitiy.getsolarDisturbance_b()
@@ -175,12 +180,12 @@ for  i in range(0,N-1):  #loop for control-cycle
 		#getting applied torque by actuator modelling (magnetic torque limitation is being considered)
 
 #save the data files
-os.chdir('Logs-Uncontrolled/')
+os.chdir('Logs-Detumbling/')
 os.mkdir('trial')
 os.chdir('trial')
-np.savetxt('position.csv',m_sgp_output_i[:,1:4], delimiter=",")
-np.savetxt('velocity.csv',m_sgp_output_i[:,4:7], delimiter=",")
-np.savetxt('time.csv',m_sgp_output_i[:,0], delimiter=",")
+np.savetxt('position.csv',m_sgp_output_i[init:end+1,1:4], delimiter=",")
+np.savetxt('velocity.csv',m_sgp_output_i[init:end+1,4:7], delimiter=",")
+np.savetxt('time.csv',m_sgp_output_i[init:end+1,0] - t0, delimiter=",")
 np.savetxt('state.csv',v_state, delimiter=",")
 np.savetxt('euler.csv',euler, delimiter=",")
 np.savetxt('disturbance-total.csv',torque_dist_total, delimiter=",")

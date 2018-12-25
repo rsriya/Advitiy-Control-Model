@@ -1,6 +1,7 @@
 import numpy as np
 
 #------------Initial conditions
+
 v_q0_BO = np.array([0.,0.,0.,1.])	#unit quaternion initial condition
 v_w0_BOB = np.array([0.,0.,0.])
 
@@ -15,7 +16,7 @@ orbitbool = 1
 # boolean determining whether disturbance will act or not
 # 1 means disturbance present
 # 0 means disturbance absent
-distbool = 0
+distbool = 1
 
 # boolean determining whether sensor modelling will be used or not
 # 1 means sensor-modelling present
