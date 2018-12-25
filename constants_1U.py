@@ -52,6 +52,13 @@ v_Ax = np.array([0.01,0.,0.])	#area vector perpendicular to x-axis in m^2
 v_Ay = np.array([0.,0.01,0.])	#area vector perpendicular to y-axis in m^2
 v_Az = np.array([0.,0.,0.01])	#area vector perpendicular to z-axis in m^2
 
+#------------Initial conditions
+v_q0_BO = np.array([1.,0.,0.,0.])	#unit quaternion initial condition
+
+MODEL_STEP=0.1
+CONTROL_STEP = 2.0	#control cycle time period in second
+h = 1e-3 #step size of integration in seconds
+
 INDUCTANCE = 68e-3	#Inductance of torquer in Henry
 RESISTANCE = 107.0	#Resistance of torquer	in Ohm
 PWM_AMPLITUDE = 3.3	#PWM amplitude in volt

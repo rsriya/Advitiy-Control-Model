@@ -75,51 +75,56 @@ Advitiy.setDisturbance_i(np.array([0.,0.,0.]))
 
 #-------------Main for loop---------------------
 for  i in range(0,N-1):
-	
-	if math.fmod(i,int(N/100)) == 0:
-		print (int(100*i/N)) 
-	
-	#Set satellite parameters
-	Advitiy.setLight(m_light_output[i,1])
-	Advitiy.setState(v_state[i,:])
-	Advitiy.setTime(t0 + i*MODEL_STEP)
-	Advitiy.setPos(m_sgp_output_i[i,1:4])
-	Advitiy.setVel(m_sgp_output_i[i,4:7])
-	Advitiy.setSun_i(m_si_output_b[i,1:4])
-	#v_magnetic_field_b_p=sen
-	# obtain these data from magmeter modelling
-	#print (m_magnetic_field_i[i,1:4])
-	if i==0:
-		v_magnetic_field_b_p=qnv.quatRotate(v_state[0,0:4],m_magnetic_field_i[i,1:4])
-	else:
-		v_magnetic_field_b_p=qnv.quatRotate(v_state[i-1,0:4],m_magnetic_field_i[i,1:4])
-	v_magnetic_field_b_c=qnv.quatRotate(Advitiy.getQ(),m_magnetic_field_i[i+1,1:4])
-	Advitiy.setMag_b_m_p(v_magnetic_field_b_p) 		
-	Advitiy.setMag_b_m_c(v_magnetic_field_b_c)
-	Advitiy.setMag_i(m_magnetic_field_i[i+1,1:4])
+    print(i)
+# =============================================================================
+#     if math.fmod(i,int(N/100)) == 0:
+#         print (int(100*i/N)) 
+#     if i==600  : break
+# =============================================================================
+    #Set satellite parameters
+    Advitiy.setLight(m_light_output[i,1])
+    Advitiy.setState(v_state[i,:])
+    Advitiy.setTime(t0 + i*MODEL_STEP)
+    Advitiy.setPos(m_sgp_output_i[i,1:4])
+    Advitiy.setVel(m_sgp_output_i[i,4:7])
+    Advitiy.setSun_i(m_si_output_b[i,1:4])
+    #v_magnetic_field_b_p=sen
+    # obtain these data from magmeter modelling
+    #print (m_magnetic_field_i[i,1:4])
+    Advitiy.setQ(v_state[i,0:4])
+    v_q_BI[i,:]=Advitiy.getQ()
+    if i==0:
+        v_magnetic_field_b_p=qnv.quatRotate(v_q_BI[0,:],m_magnetic_field_i[i,1:4])
+        v_magnetic_field_b_c=v_magnetic_field_b_p.copy()
+    else:
+        v_magnetic_field_b_p=qnv.quatRotate(v_q_BI[i-1,0:4],m_magnetic_field_i[i-1,1:4])
+    v_magnetic_field_b_c=qnv.quatRotate(v_q_BI[i,0:4],m_magnetic_field_i[i,1:4])
+    Advitiy.setMag_b_m_p(v_magnetic_field_b_p)         
+    Advitiy.setMag_b_m_c(v_magnetic_field_b_c)
+    Advitiy.setMag_i(m_magnetic_field_i[i,1:4])
 
-	v_torque_gg_b = dist.ggTorqueb(Advitiy).copy()
-	v_torque_aero_b = dist.aeroTorqueb(Advitiy).copy()
-	v_torque_solar_b = dist.solarTorqueb(Advitiy).copy()
-	v_torque_total_b =(v_torque_gg_b + v_torque_aero_b + v_torque_solar_b)
-	Advitiy.setDisturbance_i(v_torque_total_b)
-	torque_dist[i,:] = v_torque_total_b.copy()
-	
-	if math.fmod(i,20) == 0:
-		v_magMoment = detcon.magMoment(Advitiy)
-	v_magnetic_field_b = qnv.quatRotate(Advitiy.getQ(),Advitiy.getMag_i()) * 10**(-9)
-	v_control_torque_b = np.cross(v_magMoment,v_magnetic_field_b)
-	Advitiy.setControl_b(v_control_torque_b)
+    v_torque_gg_b = dist.ggTorqueb(Advitiy).copy()
+    v_torque_aero_b = dist.aeroTorqueb(Advitiy).copy()
+    v_torque_solar_b = dist.solarTorqueb(Advitiy).copy()
+    v_torque_total_b =(v_torque_gg_b + v_torque_aero_b + v_torque_solar_b)
+    Advitiy.setDisturbance_b(v_torque_total_b)
+    torque_dist[i,:] = v_torque_total_b.copy()
+    
+    if math.fmod(i,20) == 0:
+        v_magMoment = detcon.magMoment(Advitiy)
+    v_magnetic_field_b = qnv.quatRotate(v_q_BI[i,0:4],Advitiy.getMag_i()) * 10**(-9)
+    v_control_torque_b = np.cross(v_magMoment,v_magnetic_field_b)
+    Advitiy.setControl_b(v_control_torque_b)
 
-	v_state_next = np.zeros((1,7))
+    v_state_next = np.zeros((1,7))
+
 
     if i%20==0:
         voltage=ctrlTorqueToVoltage(Advitiy)
         v_duty_cycle=voltage/PWM_AMPLITUDE
-        m_current_list = act.getCurrentList(h,v_duty_cycle)  #for getting  PWM current list for a CONTROL_STEP
-# =============================================================================
-#         m_current_list=I(voltage)    # for getting DC current list for a CONTROL_STEP
-# =============================================================================
+#        v_duty_cycle=np.array([0.5,0.5,0.5])
+#        m_current_list = act.getCurrentList(h,v_duty_cycle)  #for getting  PWM current list for a CONTROL_STEP
+        m_current_list=I(voltage)    # for getting DC current list for a CONTROL_STEP
         v_app_torque_b=currentToTorque(m_current_list,Advitiy)
         for k in range(0,v_app_torque_b.shape[0]):
             Advitiy.setAppTorque_b(v_app_torque_b[k].copy())
